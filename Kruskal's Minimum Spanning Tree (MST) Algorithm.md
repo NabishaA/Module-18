@@ -1,81 +1,93 @@
-# Ex. No: 18A - Prim's Minimum Spanning Tree (MST) Algorithm
+# Ex. No: 18B - Kruskal's Minimum Spanning Tree (MST) Algorithm
 
 ## AIM:
-To write a Python program for **Prim's Minimum Spanning Tree (MST)** algorithm.
+To write a Python program for **Kruskal's algorithm** to find the Minimum Spanning Tree (MST) of a given connected, undirected, and weighted graph.
 
 ## ALGORITHM:
 
-**Step 1**: Initialize the `key[]` array to infinity, set the first vertex's key to `0`, and create `mstSet[]` and `parent[]` arrays.
+**Step 1**: Sort all the edges of the graph in non-decreasing order of their weights.
 
-**Step 2**: Select the vertex with the smallest key value not yet included in `mstSet`.
+**Step 2**: Initialize the `parent[]` and `rank[]` arrays for each vertex to keep track of the disjoint sets.
 
-**Step 3**: Add the selected vertex to `mstSet`.
+**Step 3**: Iterate through the sorted edges and pick the smallest edge. Check whether including this edge will form a cycle using the union-find method:
+- If the vertices of the edge belong to different sets, include it in the MST.
+- Perform a union of these two sets.
 
-**Step 4**: For all adjacent vertices:
-- If the edge weight is smaller than their current key value, and the vertex is not in `mstSet`, then:
-  - Update their key value
-  - Update their parent to the current vertex
+**Step 4**: Repeat Step 3 until the MST contains exactly `V-1` edges.
 
-**Step 5**: Repeat Steps 2–4 until all vertices are included in the MST.
-
-**Step 6**: Print the resulting Minimum Spanning Tree using the `parent[]` array.
+**Step 5**: Print the edges included in the MST and the total minimum cost.
 
 ## PYTHON PROGRAM
 
 ```
-import sys
+from collections import defaultdict
 
-class Graph():
+class Graph:
 
 	def __init__(self, vertices):
 		self.V = vertices
-		self.graph = [[0 for column in range(vertices)]
-					for row in range(vertices)]
+		self.graph = []
 
-	def printMST(self, parent):
-		print("Edge   Weight")
-		for i in range(1, self.V):
-			print(parent[i], "-", i, "  ", self.graph[i][parent[i]])
+	def addEdge(self, u, v, w):
+		self.graph.append([u, v, w])
 
-	def minKey(self, key, mstSet):
-		min = sys.maxsize
-		for v in range(self.V):
-			if key[v] < min and mstSet[v] == False:
-				min = key[v]
-				min_index = v
-		return min_index
+	def find(self, parent, i):
+		if parent[i] == i:
+			return i
+		return self.find(parent, parent[i])
 
-	def primMST(self):
-		key = [sys.maxsize] * self.V
-		parent = [None] * self.V
-		key[0] = 0
-		mstSet = [False] * self.V
-		parent[0] = -1
-		for cout in range(self.V):
-			u = self.minKey(key, mstSet)
-			mstSet[u] = True
-			for v in range(self.V):
-				if self.graph[u][v] > 0 and mstSet[v] == False and key[v] > self.graph[u][v]:
-					key[v] = self.graph[u][v]
-					parent[v] = u
-		self.printMST(parent)
+	def union(self, parent, rank, x, y):
+		xroot = self.find(parent, x)
+		yroot = self.find(parent, y)
+		if rank[xroot] < rank[yroot]:
+			parent[xroot] = yroot
+		elif rank[xroot] > rank[yroot]:
+			parent[yroot] = xroot
+		else:
+			parent[yroot] = xroot
+			rank[xroot] += 1
 
-g = Graph(5)
-g.graph = [ [0, 2, 0, 6, 0],
-			[2, 0, 3, 8, 5],
-			[0, 3, 0, 0, 7],
-			[6, 8, 0, 0, 9],
-			[0, 5, 7, 9, 0]]
+	def KruskalMST(self):
+		result = []
+		i = 0
+		e = 0
+		self.graph = sorted(self.graph, key=lambda item: item[2])
+		parent = []
+		rank = []
+		for node in range(self.V):
+			parent.append(node)
+			rank.append(0)
+		while e < self.V - 1:
+			u, v, w = self.graph[i]
+			i += 1
+			x = self.find(parent, u)
+			y = self.find(parent, v)
+			if x != y:
+				e += 1
+				result.append([u, v, w])
+				self.union(parent, rank, x, y)
+		minimumCost = 0
+		print("Edges in the constructed MST")
+		for u, v, weight in result:
+			minimumCost += weight
+			print("%d -- %d == %d" % (u, v, weight))
+		print("Minimum Spanning Tree", minimumCost)
 
-g.primMST()
+g = Graph(4)
+g.addEdge(0, 1, 10)
+g.addEdge(0, 2, 6)
+g.addEdge(0, 3, 5)
+g.addEdge(1, 3, 15)
+g.addEdge(2, 3, 4)
+
+g.KruskalMST()
 ```
 
 ## OUTPUT
 
-![image](https://github.com/user-attachments/assets/f14135b8-9bf7-46be-a7cf-ef694bedcb19)
+![image](https://github.com/user-attachments/assets/d5fd0d1a-9cc4-46ec-86e3-6a4b84808cda)
 
 ## RESULT
 
-Thus, the python program for **Prim's Minimum Spanning Tree (MST)** algorithm has been executed and verified successfully.
-
+Thus, the python program for **Kruskal's algorithm** to find the Minimum Spanning Tree (MST) of a given connected, undirected, and weighted graph has been executed and verified successfully.
 
